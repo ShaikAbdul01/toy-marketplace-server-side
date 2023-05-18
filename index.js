@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 require("dotenv").config();
 const app = express();
@@ -30,10 +30,46 @@ async function run() {
     await client.connect();
 
     const toyCarCollection = client.db("toyCar").collection("cars");
+    const addToysCollection = client.db("toyCar").collection("addToy");
 
     app.get("/cars", async (req, res) => {
       const cursor = toyCarCollection.find();
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/cars/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toyCarCollection.findOne(query);
+      res.send(result);
+    });
+
+
+
+    app.get("/addToys", async (req, res) => {
+      const cursor = addToysCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+
+    app.get('/addToys/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email }; // Assuming the email field is stored as a string
+    
+      try {
+        const result = await addToysCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        console.error('Error retrieving toy data:', error);
+        res.status(500).send('An error occurred while retrieving toy data.');
+      }
+    });
+
+    app.post("/addToys", async (req, res) => {
+      const toys = req.body;
+      const result = await addToysCollection.insertOne(toys);
       res.send(result);
     });
 
