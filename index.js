@@ -83,7 +83,15 @@ async function run() {
         const filter = { _id: new ObjectId(id) };
         const updateDoc = {
           $set: {
-            status: updatedBody.status,
+            carName: updatedBody.carName,
+            picture: updatedBody.picture,
+            price: updatedBody.price,
+            email: updatedBody.email,
+            description: updatedBody.description,
+            quantity: updatedBody.quantity,
+            rating: updatedBody.rating,
+            sellerName: updatedBody.sellerName,
+            subCategory: updatedBody.subCategory,
           },
         };
         const result = await addToysCollection.updateOne(filter, updateDoc);
