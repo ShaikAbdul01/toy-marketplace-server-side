@@ -51,11 +51,18 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/addToys/:email", async (req, res) => {
+    app.get("/addToys/id/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await addToysCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/addToys/email/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       try {
-        const result = await addToysCollection.findOne(query);
+        const result = await addToysCollection.find(query).toArray();
         res.send(result);
       } catch (error) {
         console.error("Error retrieving toy data:", error);
@@ -67,6 +74,37 @@ async function run() {
       const toys = req.body;
       const result = await addToysCollection.insertOne(toys);
       res.send(result);
+    });
+
+   /*  app.put("/addToys/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updatedBody = req.body;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            status: updatedBody.status,
+          },
+        };
+        const result = await addToysCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating toy:", error);
+        res.status(500).send("An error occurred while updating the toy.");
+      }
+    }); */
+    
+
+    app.delete("/addToys/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await addToysCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        console.error("Error deleting toy:", error);
+        res.status(500).send("An error occurred while deleting the toy.");
+      }
     });
 
     // Send a ping to confirm a successful connection
