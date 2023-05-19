@@ -76,7 +76,7 @@ async function run() {
       res.send(result);
     });
 
-   /*  app.put("/addToys/:id", async (req, res) => {
+    app.put("/addToys/id/:id", async (req, res) => {
       try {
         const id = req.params.id;
         const updatedBody = req.body;
@@ -92,10 +92,9 @@ async function run() {
         console.error("Error updating toy:", error);
         res.status(500).send("An error occurred while updating the toy.");
       }
-    }); */
-    
+    });
 
-    app.delete("/addToys/:id", async (req, res) => {
+    app.delete("/addToys/id/:id", async (req, res) => {
       try {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
