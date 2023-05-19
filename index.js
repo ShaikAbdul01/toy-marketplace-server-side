@@ -29,8 +29,51 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const categoryCollection = client.db("toyCar").collection("carsToy");
     const toyCarCollection = client.db("toyCar").collection("cars");
     const addToysCollection = client.db("toyCar").collection("addToy");
+
+    app.get("/carsToy", async (req, res) => {
+      const cursor = categoryCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/carsToy/categories", async (req, res) => {
+      const query = {}; // An empty query will match all documents
+
+      const result = await categoryCollection.find(query).toArray();
+
+      res.send(result);
+    });
+
+    app.get(
+      "/carsToy/:categoryName/:subCategoryName/:toyName",
+      async (req, res) => {
+        const categoryName = req.params.categoryName;
+        const subCategoryName = req.params.subCategoryName;
+        const toyName = req.params.toyName;
+        const query = {
+          "categories.name": categoryName,
+          "categories.subCategories.name": subCategoryName,
+          "categories.subCategories.toys.name": toyName,
+        };
+        const result = await categoryCollection.findOne(query);
+        if (result) {
+          // Find the specific toy within the nested structure
+          const category = result.categories.find(
+            (cat) => cat.name === categoryName
+          );
+          const subCategory = category.subCategories.find(
+            (subCat) => subCat.name === subCategoryName
+          );
+          const toy = subCategory.toys.find((toy) => toy.name === toyName);
+          res.send(toy);
+        } else {
+          res.status(404).send("Toy not found");
+        }
+      }
+    );
 
     app.get("/cars", async (req, res) => {
       const cursor = toyCarCollection.find();
