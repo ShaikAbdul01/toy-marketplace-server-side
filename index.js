@@ -8,6 +8,12 @@ const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://toy-car-plaza.web.app');
+  next();
+})
+
+
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5yf9dzl.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -142,6 +148,7 @@ async function run() {
         res.status(500).send("An error occurred while updating the toy.");
       }
     });
+    
 
     app.delete("/addToys/id/:id", async (req, res) => {
       try {
@@ -154,7 +161,7 @@ async function run() {
         res.status(500).send("An error occurred while deleting the toy.");
       }
     });
-
+    app.options("*", cors());
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
