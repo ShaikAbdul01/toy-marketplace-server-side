@@ -6,14 +6,18 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+const corsOptions = {
+  origin: "https://toy-car-plaza.web.app",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://toy-car-plaza.web.app');
+  res.setHeader("Access-Control-Allow-Origin", "https://toy-car-plaza.web.app");
   next();
-})
-
-
+});
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5yf9dzl.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -124,31 +128,30 @@ async function run() {
     });
 
     app.put("/addToys/id/:id", async (req, res) => {
-      try {
-        const id = req.params.id;
-        const updatedBody = req.body;
-        const filter = { _id: new ObjectId(id) };
-        const updateDoc = {
-          $set: {
-            carName: updatedBody.carName,
-            picture: updatedBody.picture,
-            price: updatedBody.price,
-            email: updatedBody.email,
-            description: updatedBody.description,
-            quantity: updatedBody.quantity,
-            rating: updatedBody.rating,
-            sellerName: updatedBody.sellerName,
-            subCategory: updatedBody.subCategory,
-          },
-        };
-        const result = await addToysCollection.updateOne(filter, updateDoc);
-        res.send(result);
-      } catch (error) {
-        console.error("Error updating toy:", error);
-        res.status(500).send("An error occurred while updating the toy.");
-      }
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedBody = req.body;
+      const updateDoc = {
+        $set: {
+          carName: updatedBody.carName,
+          picture: updatedBody.picture,
+          price: updatedBody.price,
+          email: updatedBody.email,
+          description: updatedBody.description,
+          quantity: updatedBody.quantity,
+          rating: updatedBody.rating,
+          sellerName: updatedBody.sellerName,
+          subCategory: updatedBody.subCategory,
+        },
+      };
+      const result = await addToysCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
     });
-    
 
     app.delete("/addToys/id/:id", async (req, res) => {
       try {
@@ -161,7 +164,7 @@ async function run() {
         res.status(500).send("An error occurred while deleting the toy.");
       }
     });
-    app.options("*", cors());
+    // app.options("*", cors());
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
